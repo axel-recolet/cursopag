@@ -1,6 +1,6 @@
 import mongoose, { Model, Types, Schema } from 'mongoose';
 import { MongoMemoryServer } from 'mongodb-memory-server';
-import { cursopag } from 'src/index';
+import { cursopag } from 'src/cursopag';
 
 jest.setTimeout(50000);
 
@@ -352,16 +352,16 @@ describe('cursopag', () => {
       expect(result.totalCount).toEqual(mongooseResult.length);
       expect(result.edges).toHaveLength(2);
 
-      expect(result.edges[0].node.name).toEqual(mongooseResult[5].name);
+      expect(result.edges[0].node.name).toEqual(mongooseResult[6].name);
       expect(result.edges[1].node.name).toEqual(mongooseResult[7].name);
 
       expect(result.pageInfo).toEqual({
         startCursor: cursorEncoder(
           EJSON.stringify(
             {
-              _id: mongooseResult[2]._id,
-              name: mongooseResult[2].name,
-              isTerrestrial: mongooseResult[2].isTerrestrial,
+              _id: mongooseResult[6]._id,
+              name: mongooseResult[6].name,
+              isTerrestrial: mongooseResult[6].isTerrestrial,
             },
             { relaxed: false },
           ),
@@ -369,15 +369,15 @@ describe('cursopag', () => {
         endCursor: cursorEncoder(
           EJSON.stringify(
             {
-              _id: mongooseResult[5]._id,
-              name: mongooseResult[5].name,
-              isTerrestrial: mongooseResult[5].isTerrestrial,
+              _id: mongooseResult[7]._id,
+              name: mongooseResult[7].name,
+              isTerrestrial: mongooseResult[7].isTerrestrial,
             },
             { relaxed: false },
           ),
         ),
         hasPreviousPage: true,
-        hasNextPage: true,
+        hasNextPage: false,
       });
     });
   });

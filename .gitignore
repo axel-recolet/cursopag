@@ -6,3 +6,6 @@
 # vscode
 /.vscode
 !/.vscode/settings.json
+
+# lock.yaml
+*npm-lock.yaml

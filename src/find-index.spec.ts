@@ -1,4 +1,4 @@
-import { findIndex } from './skip-count';
+import { findIndex } from './find-index';
 
 describe('findIndex function', () => {
   let testList: { _id: number; name: string }[];
@@ -23,16 +23,16 @@ describe('findIndex function', () => {
         } else return a._id - b._id;
       });
 
-      const index = findIndex(
-        -1,
+      const index = findIndex({
+        direction: -1,
         cursor,
-        testList,
-        [
+        list: testList,
+        sort: [
           ['name', 1],
           ['_id', 1],
         ],
-        true,
-      );
+        skipCursor: true,
+      });
       expect(index).toBe(3);
     });
 
@@ -46,16 +46,16 @@ describe('findIndex function', () => {
         } else return a._id - b._id;
       });
 
-      const index = findIndex(
-        -1,
+      const index = findIndex({
+        direction: -1,
         cursor,
-        testList,
-        [
+        list: testList,
+        sort: [
           ['name', 1],
           ['_id', 1],
         ],
-        false,
-      );
+        skipCursor: false,
+      });
       expect(index).toBe(4);
     });
 
@@ -68,16 +68,16 @@ describe('findIndex function', () => {
         } else return a._id - b._id;
       });
 
-      const index = findIndex(
-        -1,
+      const index = findIndex({
+        direction: -1,
         cursor,
-        testList,
-        [
+        list: testList,
+        sort: [
           ['name', 1],
           ['_id', 1],
         ],
-        false,
-      );
+        skipCursor: false,
+      });
       expect(index).toBe(3);
     });
 
@@ -90,16 +90,16 @@ describe('findIndex function', () => {
         } else return a._id - b._id;
       });
 
-      const index = findIndex(
-        -1,
+      const index = findIndex({
+        direction: -1,
         cursor,
-        testList,
-        [
+        list: testList,
+        sort: [
           ['name', 1],
           ['_id', 1],
         ],
-        true,
-      );
+        skipCursor: true,
+      });
       expect(index).toBe(3);
     });
 
@@ -114,16 +114,16 @@ describe('findIndex function', () => {
           } else return a._id - b._id;
         });
 
-        const index = findIndex(
-          -1,
+        const index = findIndex({
+          direction: -1,
           cursor,
-          testList,
-          [
+          list: testList,
+          sort: [
             ['name', -1],
             ['_id', 1],
           ],
-          true,
-        );
+          skipCursor: true,
+        });
         expect(index).toBe(1);
       });
 
@@ -137,16 +137,16 @@ describe('findIndex function', () => {
           } else return a._id - b._id;
         });
 
-        const index = findIndex(
-          -1,
+        const index = findIndex({
+          direction: -1,
           cursor,
-          testList,
-          [
+          list: testList,
+          sort: [
             ['name', -1],
             ['_id', 1],
           ],
-          false,
-        );
+          skipCursor: false,
+        });
         expect(index).toBe(2);
       });
 
@@ -159,16 +159,16 @@ describe('findIndex function', () => {
           } else return a._id - b._id;
         });
 
-        const index = findIndex(
-          -1,
+        const index = findIndex({
+          direction: -1,
           cursor,
-          testList,
-          [
+          list: testList,
+          sort: [
             ['name', -1],
             ['_id', 1],
           ],
-          false,
-        );
+          skipCursor: false,
+        });
         expect(index).toBe(1);
       });
 
@@ -181,16 +181,16 @@ describe('findIndex function', () => {
           } else return a._id - b._id;
         });
 
-        const index = findIndex(
-          -1,
+        const index = findIndex({
+          direction: -1,
           cursor,
-          testList,
-          [
+          list: testList,
+          sort: [
             ['name', -1],
             ['_id', 1],
           ],
-          true,
-        );
+          skipCursor: true,
+        });
         expect(index).toBe(1);
       });
 
@@ -203,16 +203,16 @@ describe('findIndex function', () => {
           } else return a._id - b._id;
         });
 
-        const index = findIndex(
-          -1,
+        const index = findIndex({
+          direction: -1,
           cursor,
-          testList,
-          [
+          list: testList,
+          sort: [
             ['name', -1],
             ['_id', 1],
           ],
-          true,
-        );
+          skipCursor: true,
+        });
         expect(index).toBe(0);
       });
 
@@ -225,16 +225,16 @@ describe('findIndex function', () => {
           } else return a._id - b._id;
         });
 
-        const index = findIndex(
-          -1,
+        const index = findIndex({
+          direction: -1,
           cursor,
-          testList,
-          [
+          list: testList,
+          sort: [
             ['name', -1],
             ['_id', 1],
           ],
-          false,
-        );
+          skipCursor: false,
+        });
         expect(index).toBe(0);
       });
     });
@@ -251,16 +251,16 @@ describe('findIndex function', () => {
         } else return a._id - b._id;
       });
 
-      const index = findIndex(
-        1,
+      const index = findIndex({
+        direction: 1,
         cursor,
-        testList,
-        [
+        list: testList,
+        sort: [
           ['name', 1],
           ['_id', 1],
         ],
-        true,
-      );
+        skipCursor: true,
+      });
       expect(index).toBe(4);
     });
 
@@ -274,16 +274,16 @@ describe('findIndex function', () => {
         } else return a._id - b._id;
       });
 
-      const index = findIndex(
-        1,
+      const index = findIndex({
+        direction: 1,
         cursor,
-        testList,
-        [
+        list: testList,
+        sort: [
           ['name', 1],
           ['_id', 1],
         ],
-        false,
-      );
+        skipCursor: false,
+      });
       expect(index).toBe(3);
     });
 
@@ -296,16 +296,16 @@ describe('findIndex function', () => {
         } else return a._id - b._id;
       });
 
-      const index = findIndex(
-        1,
+      const index = findIndex({
+        direction: 1,
         cursor,
-        testList,
-        [
+        list: testList,
+        sort: [
           ['name', 1],
           ['_id', 1],
         ],
-        false,
-      );
+        skipCursor: false,
+      });
       expect(index).toBe(3);
     });
 
@@ -318,16 +318,16 @@ describe('findIndex function', () => {
         } else return a._id - b._id;
       });
 
-      const index = findIndex(
-        1,
+      const index = findIndex({
+        direction: 1,
         cursor,
-        testList,
-        [
+        list: testList,
+        sort: [
           ['name', 1],
           ['_id', 1],
         ],
-        true,
-      );
+        skipCursor: true,
+      });
       expect(index).toBe(3);
     });
 
@@ -342,16 +342,16 @@ describe('findIndex function', () => {
           } else return a._id - b._id;
         });
 
-        const index = findIndex(
-          1,
+        const index = findIndex({
+          direction: 1,
           cursor,
-          testList,
-          [
+          list: testList,
+          sort: [
             ['name', -1],
             ['_id', 1],
           ],
-          true,
-        );
+          skipCursor: true,
+        });
         expect(index).toBe(2);
       });
 
@@ -365,16 +365,16 @@ describe('findIndex function', () => {
           } else return a._id - b._id;
         });
 
-        const index = findIndex(
-          1,
+        const index = findIndex({
+          direction: 1,
           cursor,
-          testList,
-          [
+          list: testList,
+          sort: [
             ['name', -1],
             ['_id', 1],
           ],
-          false,
-        );
+          skipCursor: false,
+        });
         expect(index).toBe(1);
       });
 
@@ -387,16 +387,16 @@ describe('findIndex function', () => {
           } else return a._id - b._id;
         });
 
-        const index = findIndex(
-          1,
+        const index = findIndex({
+          direction: 1,
           cursor,
-          testList,
-          [
+          list: testList,
+          sort: [
             ['name', -1],
             ['_id', 1],
           ],
-          false,
-        );
+          skipCursor: false,
+        });
         expect(index).toBe(1);
       });
 
@@ -409,16 +409,16 @@ describe('findIndex function', () => {
           } else return a._id - b._id;
         });
 
-        const index = findIndex(
-          1,
+        const index = findIndex({
+          direction: 1,
           cursor,
-          testList,
-          [
+          list: testList,
+          sort: [
             ['name', -1],
             ['_id', 1],
           ],
-          true,
-        );
+          skipCursor: true,
+        });
         expect(index).toBe(1);
       });
 
@@ -431,16 +431,16 @@ describe('findIndex function', () => {
           } else return a._id - b._id;
         });
 
-        const index = findIndex(
-          1,
+        const index = findIndex({
+          direction: 1,
           cursor,
-          testList,
-          [
+          list: testList,
+          sort: [
             ['name', 1],
             ['_id', 1],
           ],
-          true,
-        );
+          skipCursor: true,
+        });
         expect(index).toBe(4);
       });
 
@@ -453,16 +453,16 @@ describe('findIndex function', () => {
           } else return a._id - b._id;
         });
 
-        const index = findIndex(
-          1,
+        const index = findIndex({
+          direction: 1,
           cursor,
-          testList,
-          [
+          list: testList,
+          sort: [
             ['name', 1],
             ['_id', 1],
           ],
-          false,
-        );
+          skipCursor: false,
+        });
         expect(index).toBe(4);
       });
     });

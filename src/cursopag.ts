@@ -5,7 +5,6 @@ import {
   ProjectionFields,
   QueryOptions,
   Schema,
-  SchemaType,
   SortOrder,
 } from 'mongoose';
 import { CursopagResponse, Edge } from '../types/paginated-response.interface';
@@ -19,10 +18,10 @@ import { getValueByPath } from './get-value-by-path';
 import { createMainSortedFiledCondition } from './create-main-sorted-filed-condition';
 import { reverseSortOrder } from './normalize-sort';
 import { getLimitAndDirection } from './get-limit-and-direction';
-import { skipCount } from './skip-count';
+import { skipCountForward } from './skip-count-forward';
 import { RankedValue } from './compare-value';
 import { EJSON } from 'bson';
-import { skipBackward } from './skip-backward';
+import { skipCountBackward } from './skip-count-backward';
 
 /**
  * Represents an asynchronous function that retrieves documents in an ascending direction.
@@ -48,7 +47,7 @@ export async function forward<T>({
   sort,
   projection,
   queryOptions,
-  skipEqual,
+  skipCursor,
   cursorEncoder = defaultCursorEncoder,
 }: {
   model: Model<T>;
@@ -58,7 +57,7 @@ export async function forward<T>({
   sort: [string, 1 | -1][];
   projection?: ProjectionFields<T> | string | null;
   queryOptions?: Omit<QueryOptions<T>, 'sort' | 'skip'>;
-  skipEqual: boolean;
+  skipCursor: boolean;
   cursorEncoder?: (cursor: string) => string | Promise<string>;
 }): Promise<Edge<T>[]> {
   try {
@@ -93,13 +92,12 @@ export async function forward<T>({
     const skip =
       !cursor || mainSortedFieldIsUnique
         ? 0
-        : await skipCount({
+        : await skipCountForward({
             model,
             cursor,
             sort,
             filter,
-            skipEqual,
-            fullCheck,
+            skipCursor,
           });
 
     // Create conditions for the main sorted field
@@ -110,7 +108,7 @@ export async function forward<T>({
             sort[0],
             mainSortedValue,
             model.schema,
-            skipEqual,
+            skipCursor,
             1,
           );
 
@@ -186,7 +184,7 @@ export async function backward<T>({
   sort,
   projection,
   queryOptions,
-  skipEqual,
+  skipCursor,
   reqLength,
   cursorEncoder = defaultCursorEncoder,
 }: {
@@ -197,7 +195,7 @@ export async function backward<T>({
   sort: [string, 1 | -1][];
   projection?: ProjectionFields<T> | string | null;
   queryOptions?: Omit<QueryOptions<T>, 'sort' | 'skip'>;
-  skipEqual: boolean;
+  skipCursor: boolean;
   reqLength: number;
   cursorEncoder?: (cursor: string) => string | Promise<string>;
 }): Promise<Edge<T>[]> {
@@ -228,12 +226,12 @@ export async function backward<T>({
       if (mainSortedFieldIsUnique) return 0;
       if (!cursor) return reqLength - limit;
 
-      const skip = await skipBackward({
+      const skip = await skipCountBackward({
         model,
         cursor,
         sort,
         filter,
-        skipEqual,
+        skipCursor,
       });
 
       return skip - limit;
@@ -251,7 +249,7 @@ export async function backward<T>({
           sort[0],
           mainSortedValue,
           model.schema,
-          skipEqual,
+          skipCursor,
           -1,
         );
 
@@ -330,7 +328,7 @@ export async function getEdges<T>(params: {
   last?: number;
   projection?: ProjectionFields<T> | string | null;
   queryOptions?: Omit<QueryOptions<T>, 'sort' | 'skip'>;
-  skipEqual: boolean;
+  skipCursor: boolean;
   reqLength: number;
   decodeCursor?: <T extends object>(encodedCursor: string) => Promise<T>;
 }): Promise<Edge<T>[]> {
@@ -385,7 +383,7 @@ export async function paginationCursor<T>({
   filter,
   projection,
   queryOptions,
-  skipEqual,
+  skipCursor,
   reqLength,
   cursorEncoder,
 }: {
@@ -397,7 +395,7 @@ export async function paginationCursor<T>({
   direction: 1 | -1;
   projection?: ProjectionFields<T> | string | null;
   queryOptions?: Omit<QueryOptions<T>, 'sort' | 'skip'>;
-  skipEqual: boolean;
+  skipCursor: boolean;
   reqLength: number;
   cursorEncoder?: (cursor: string) => string | Promise<string>;
 }): Promise<Edge<T>[]> {
@@ -427,7 +425,7 @@ export async function paginationCursor<T>({
         sort,
         projection,
         queryOptions,
-        skipEqual,
+        skipCursor,
         cursorEncoder,
       });
     } else {
@@ -440,7 +438,7 @@ export async function paginationCursor<T>({
         sort,
         projection,
         queryOptions,
-        skipEqual,
+        skipCursor,
         reqLength,
         cursorEncoder,
       });
@@ -531,7 +529,7 @@ export async function cursopag<T>(params: {
       sort: normalizeSortOrder,
       ...(first && { first: first + 1 }),
       ...(last && { last: last + 1 }),
-      skipEqual: true,
+      skipCursor: true,
       reqLength: result.totalCount,
     });
 
@@ -545,7 +543,7 @@ export async function cursopag<T>(params: {
             projection: '_id',
             ...(first && !last && { last: 1, first: undefined }),
             ...(last && !first && { first: 1, last: undefined }),
-            skipEqual: false,
+            skipCursor: false,
             reqLength: result.totalCount,
           })
         ).length !== 0

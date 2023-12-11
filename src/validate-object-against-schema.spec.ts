@@ -7,6 +7,7 @@ import {
 } from './validate-object-against-schema';
 
 import { PlanetDocument, PlanetSchema } from '../test/planet';
+import { BSON } from 'bson';
 
 describe('validatePathType', () => {
   describe('Required', () => {
@@ -49,7 +50,7 @@ describe('validatePathType', () => {
   describe('UUID', () => {
     const schema = new Schema({ name: mongoose.Schema.Types.UUID });
     it('should return false when it is not a UUID', async () => {
-      const value = 'a';
+      const value = uuid.v5('www.cursopag.net', uuid.v5.URL);
 
       const result = validatePathType('name', value, schema);
 
@@ -57,7 +58,9 @@ describe('validatePathType', () => {
     });
 
     it('should return true when it is a UUID', async () => {
-      const value = uuid.v5('www.cursopag.net', uuid.v5.URL);
+      const uuidValue = uuid.v5('www.cursopag.net', uuid.v5.URL);
+
+      const value = new BSON.UUID(uuidValue);
 
       const result = validatePathType('name', value, schema);
 
@@ -209,7 +212,9 @@ describe('validatePathType', () => {
     it('should return true when it is a Buffer', async () => {
       const schema = new Schema({ name: Buffer });
 
-      const value = Buffer.from('khbdf', 'utf-8');
+      const buffer = Buffer.from('khbdf', 'utf-8');
+
+      const value = new BSON.Binary(buffer, 5);
 
       const result = validatePathType('name', value, schema);
 
@@ -316,7 +321,7 @@ describe('validatePathType', () => {
   });
 });
 
-describe('validateObjectAgainstSchemap', () => {
+describe('validateObjectAgainstSchema', () => {
   const subSchema = new Schema({
     foo: String,
     bar: Number,
@@ -349,13 +354,13 @@ describe('validateObjectAgainstSchemap', () => {
     let value = {
       required: faker.string.sample(),
       string: faker.string.sample(),
-      uuid: uuid.v5('www.cursopag.net', uuid.v5.URL),
+      uuid: new BSON.UUID(uuid.v5('www.cursopag.net', uuid.v5.URL)),
       number: 56,
       bigInt: 42n,
       decimal128: new mongoose.Types.Decimal128('56.98'),
       boolean: true,
       date: new Date(),
-      buffer: Buffer.from('cursopag'),
+      buffer: new BSON.Binary(Buffer.from('cursopag'), 5),
       objectId: new mongoose.Types.ObjectId(),
       map: {
         number: faker.number.int(),

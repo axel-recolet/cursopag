@@ -1,6 +1,5 @@
 import { Binary, UUID } from 'bson';
 import mongoose, { Schema, SchemaType, isObjectIdOrHexString } from 'mongoose';
-import * as uuid from 'uuid';
 
 export function isRecordStringUnknown(
   obj: unknown,
@@ -45,7 +44,7 @@ export function validatePathType(
 
   if (schemaType.isRequired && !value) {
     return false;
-  } else if (!schemaType.isRequired && !value) {
+  } else if (!schemaType.options.isRequired && !value) {
     return true;
   } else if (
     schemaType instanceof mongoose.Schema.Types.String &&
@@ -86,7 +85,8 @@ export function validatePathType(
     return true;
   } else if (
     schemaType instanceof mongoose.Schema.Types.Buffer &&
-    value instanceof Binary
+    value instanceof Binary &&
+    value.sub_type === 5
   ) {
     return true;
   } else if (
@@ -133,5 +133,5 @@ export function validatePathType(
     return true;
   }
 
-  return false; // Le type ne correspond pas
+  return false;
 }
