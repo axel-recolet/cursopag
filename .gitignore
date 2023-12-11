@@ -1,0 +1,8 @@
+/node_modules
+
+# coverage
+/coverage
+
+# vscode
+/.vscode
+!/.vscode/settings.json
