@@ -7,7 +7,7 @@ import {
   Schema,
   SortOrder,
 } from 'mongoose';
-import { CursopagResponse, Edge } from '../types/paginated-response.interface';
+import { CursopagResponse, Edge } from './paginated-response.interface';
 import { validateObjectAgainstSchema } from './validate-object-against-schema';
 import {
   cursorPreDecoder,
@@ -16,10 +16,8 @@ import {
 import { normalizeSort } from './normalize-sort';
 import { getValueByPath } from './get-value-by-path';
 import { createMainSortedFiledCondition } from './create-main-sorted-filed-condition';
-import { reverseSortOrder } from './normalize-sort';
 import { getLimitAndDirection } from './get-limit-and-direction';
 import { skipCountForward } from './skip-count-forward';
-import { RankedValue } from './compare-value';
 import { EJSON } from 'bson';
 import { skipCountBackward } from './skip-count-backward';
 
@@ -37,7 +35,7 @@ import { skipCountBackward } from './skip-count-backward';
  * @param {(cursor: string) => string | Promise<string>} [params.cursorEncoder] - The cursor encoder function.
  * @param {{ doSkip?: boolean }} [params.options] - Additional options.
  * @param {boolean} [params.options.doSkip] - Flag to indicate skipping.
- * @returns {Promise<Edge<T>[]>} The array of edges.
+ * @returns {Promise<Edge<T>[]>} The array of edges forward.
  */
 export async function forward<T>({
   model,
@@ -174,7 +172,7 @@ export async function forward<T>({
  * @param {Omit<QueryOptions<T>, 'sort' | 'skip'>} [params.queryOptions] - Additional query options.
  * @param {(cursor: string) => string | Promise<string>} [params.cursorEncoder] - The cursor encoder function.
  * @param {{ doSkip?: boolean }} [params.options] - Additional options.
- * @returns {Promise<Edge<T>[]>} The array of edges in descending order.
+ * @returns {Promise<Edge<T>[]>} The array of edges backward.
  */
 export async function backward<T>({
   model,
@@ -316,7 +314,7 @@ export async function backward<T>({
  * @param {ProjectionFields<T> | string | null} [params.projection] - The projection fields.
  * @param {Omit<QueryOptions<T>, 'sort' | 'skip'>} [params.queryOptions] - Additional query options.
  * @param {{ doSkip?: boolean }} [params.options] - Additional options.
- * @param {<T extends object>(encodedCursor: string) => Promise<T>} [params.decodeCursor] - The cursor decoder function.
+ * @param {(cursor: string) => Promise<string> | string} [params.cursorEncoder] - The cursor encoder function.
  * @returns {Promise<Edge<T>[]>} The array of edges based on pagination parameters.
  */
 export async function getEdges<T>(params: {
@@ -330,76 +328,16 @@ export async function getEdges<T>(params: {
   queryOptions?: Omit<QueryOptions<T>, 'sort' | 'skip'>;
   skipCursor: boolean;
   reqLength: number;
-  decodeCursor?: <T extends object>(encodedCursor: string) => Promise<T>;
+  cursorEncoder?: (cursor: string) => string | Promise<string>;
 }): Promise<Edge<T>[]> {
   try {
-    const { cursor, sort, first, last, ...restParams } = params;
+    const { cursor, model, sort, first, last, ...restParams } = params;
 
     // Normalize sort criteria or default to sorting by _id in ascending order
     const normalizedSort: [string, 1 | -1][] = sort
       ? normalizeSort(sort)
       : [['_id', 1]];
 
-    // Determine pagination direction and limit based on first and last parameters
-    const { direction, limit } = getLimitAndDirection({ first, last });
-
-    // Perform pagination with a cursor
-    return paginationCursor({
-      ...restParams,
-      cursor,
-      limit,
-      direction,
-      sort: normalizedSort,
-    });
-  } catch (error) {
-    throw error;
-  }
-}
-
-/**
- * Paginates documents using a cursor and provided parameters.
- * Determines the pagination direction and calls the appropriate direction function.
- * Validates the cursor and throws errors if it doesn't correspond to the schema's model.
- * @template T - The type of documents in the model.
- * @param {Object} params - The parameters object.
- * @param {Model<T>} params.model - The Mongoose model.
- * @param {Record<string, unknown>} [params.cursor] - The cursor for pagination.
- * @param {number} params.limit - The maximum number of documents to retrieve.
- * @param {1 | -1} params.direction - The pagination direction (1 for ascending, -1 for descending).
- * @param {[string, 1 | -1][]} params.sort - The sorting criteria.
- * @param {FilterQuery<T>} params.filter - The filter query.
- * @param {ProjectionFields<T> | string | null} [params.projection] - The projection fields.
- * @param {Omit<QueryOptions<T>, 'sort' | 'skip'>} [params.queryOptions] - Additional query options.
- * @param {{ doSkip?: boolean }} [params.options] - Additional options.
- * @param {(cursor: string) => string | Promise<string>} [params.cursorEncoder] - The cursor encoder function.
- * @returns {Promise<Edge<T>[]>} The array of edges based on pagination with a cursor.
- */
-export async function paginationCursor<T>({
-  model,
-  cursor,
-  limit,
-  direction,
-  sort,
-  filter,
-  projection,
-  queryOptions,
-  skipCursor,
-  reqLength,
-  cursorEncoder,
-}: {
-  model: Model<T>;
-  cursor?: Record<string, unknown>;
-  sort: [string, 1 | -1][];
-  filter: FilterQuery<T>;
-  limit: number;
-  direction: 1 | -1;
-  projection?: ProjectionFields<T> | string | null;
-  queryOptions?: Omit<QueryOptions<T>, 'sort' | 'skip'>;
-  skipCursor: boolean;
-  reqLength: number;
-  cursorEncoder?: (cursor: string) => string | Promise<string>;
-}): Promise<Edge<T>[]> {
-  try {
     if (cursor) {
       // Validate the cursor against the model's schema
       if (!validateObjectAgainstSchema(cursor, model.schema)) {
@@ -409,38 +347,32 @@ export async function paginationCursor<T>({
       }
 
       // Check if the main sorted field exists in the cursor
-      const { exists, value } = getValueByPath(cursor, sort[0][0]);
+      const { exists, value } = getValueByPath(cursor, normalizedSort[0][0]);
       if (!exists) {
         throw Error('The main sorted field is not present in the cursor.');
       }
     }
 
+    // Determine pagination direction and limit based on first and last parameters
+    const { direction, limit } = getLimitAndDirection({ first, last });
+
     if (direction === 1) {
       // Paginate in ascending direction
       return forward({
+        ...restParams,
         model,
         cursor,
-        filter,
         limit,
-        sort,
-        projection,
-        queryOptions,
-        skipCursor,
-        cursorEncoder,
+        sort: normalizedSort,
       });
     } else {
       // Paginate in descending direction
       return backward({
+        ...restParams,
         model,
         cursor,
-        filter,
         limit,
-        sort,
-        projection,
-        queryOptions,
-        skipCursor,
-        reqLength,
-        cursorEncoder,
+        sort: normalizedSort,
       });
     }
   } catch (error) {

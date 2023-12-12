@@ -1,0 +1,15 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "target": "ES2019",
+    "rootDir": "src",
+
+    // extended tsconfig.json
+    "skipLibCheck": false,
+    "allowSyntheticDefaultImports": false,
+    "resolveJsonModule": false,
+    "sourceMap": false
+  },
+  "include": ["src"],
+  "exclude": ["**/*.spec.ts"]
+}

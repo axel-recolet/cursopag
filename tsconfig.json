@@ -1,14 +1,14 @@
 {
   "compilerOptions": {
-    "module": "commonjs",
+    "module": "ESNext",
     "declaration": true,
     "removeComments": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
-    "target": "ES2021",
+    "target": "ESNext",
     "sourceMap": true,
-    "outDir": "./lib",
+    "outDir": "./dist",
     "baseUrl": "./",
     "paths": {
       "src/*": ["src/*"]
@@ -20,7 +20,9 @@
     "strictBindCallApply": false,
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "moduleResolution": "node"
   },
-  "include": ["src", "test", "types/paginated-response.interface.ts"]
+  "include": ["src", "test"],
+  "exclude": ["node_modules", "dist"]
 }

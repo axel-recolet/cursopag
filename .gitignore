@@ -1,4 +1,7 @@
 /node_modules
+/dist
+
+/tsconfig.build.tsbuildinfo
 
 # coverage
 /coverage
@@ -6,6 +9,3 @@
 # vscode
 /.vscode
 !/.vscode/settings.json
-
-# lock.yaml
-*npm-lock.yaml

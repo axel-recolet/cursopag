@@ -1,14 +1,35 @@
 {
   "name": "cursopag",
-  "version": "0.0.1",
-  "description": "",
-  "main": "lib/index.js",
+  "version": "0.1.0",
+  "description": "GraphQL cursor-based for Mongoose",
+  "main": "lib/cursopag.js",
+  "module": "lib/cursopag.js",
+  "types": "lib/cursopag.d.ts",
   "scripts": {
+    "build": "tsc --project tsconfig.build.json",
     "test:watch": "jest --watchAll",
     "test:cov": "jest --coverage"
   },
   "author": "Axel RÉCOLET <axel.recolet@outlook.fr>",
   "license": "MIT",
+  "keywords": [
+    "cursopag",
+    "cursopagjs",
+    "cursopag.js",
+    "GraphQL",
+    "mongoose"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/axel-recolet/cursopag"
+  },
+  "files": [
+    "CHANGELOG.md",
+    "CONTRIBUTING.md",
+    "LICENSE.md",
+    "README.md",
+    "dist"
+  ],
   "devDependencies": {
     "@faker-js/faker": "^8.3.1",
     "@nestjs/mongoose": "^10.0.2",
