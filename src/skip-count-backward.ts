@@ -2,7 +2,7 @@ import { Condition, FilterQuery, Model, Schema } from 'mongoose';
 import { getValueByPath } from './get-value-by-path';
 import { findIndex } from './find-index';
 
-export function booleanBeforeConditionBackward<T>(
+export function beforeConditionBackward<T>(
   [field, sortDir]: [string, 1 | -1],
   value: unknown,
   schema: Schema,
@@ -54,12 +54,9 @@ export async function skipCountBackward<T = unknown>({
     // Get the first field from the sorting criteria.
     const field = sort[0][0];
     // Retrieve the value of the field from the cursor.
-    const { value, exists } = getValueByPath(cursor, field);
+    const value = getValueByPath(cursor, field);
 
-    // Throw an error if the field doesn't exist in the cursor.
-    if (!exists) throw new Error(`${field} is not a key of cursor.`);
-
-    const beforeCondition = booleanBeforeConditionBackward(
+    const beforeCondition = beforeConditionBackward(
       sort[0],
       value,
       model.schema,

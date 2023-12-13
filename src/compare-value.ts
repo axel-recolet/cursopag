@@ -64,14 +64,10 @@ export class RankedValue<T = unknown> {
           return { rank, _value: +value.toString() };
         }
         return { rank, _value: value };
-      } else if (typeof value === 'string' || typeof value === 'symbol') {
-        // Set rank as 3 for strings or symbols, converting symbols to strings.
+      } else if (typeof value === 'string') {
+        // Set rank as 3 for strings
         const rank = 3;
-        if (typeof value === 'symbol') {
-          return { rank, _value: value.toString() };
-        } else {
-          return { rank: 3, _value: value };
-        }
+        return { rank: 3, _value: value };
       } else if (Array.isArray(value)) {
         if (value.length === 0) {
           // Set rank as -1 for empty arrays.

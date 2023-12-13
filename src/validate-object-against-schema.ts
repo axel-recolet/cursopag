@@ -26,7 +26,7 @@ export function validateObjectAgainstSchema<T>(
   for (const [key, value] of Object.entries(obj)) {
     // Vérifie que le type de la valeur correspond au schéma
     // La clé n'est pas présente dans le schéma, objet non valide
-    if (!schema.path(key) || !validatePathType(key, value, schema)) {
+    if (!validatePathType(key, value, schema)) {
       return false;
     }
   }
@@ -41,6 +41,8 @@ export function validatePathType(
   schema: Schema,
 ): boolean {
   const schemaType = schema.path(path);
+
+  if (!schemaType) return false;
 
   if (schemaType.isRequired && !value) {
     return false;

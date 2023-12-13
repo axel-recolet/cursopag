@@ -122,9 +122,11 @@ export function normalizeArraySort(
  * @returns {[string, 1 | -1][]} An array of tuples representing normalized sorting criteria.
  */
 export function normalizeSort(
-  sort: string | { [key: string]: SortOrder } | [string, SortOrder][],
+  sort?: string | { [key: string]: SortOrder } | [string, SortOrder][],
 ): [string, 1 | -1][] {
   try {
+    if (!sort) return [['_id', 1]];
+
     const result: [string, 1 | -1][] = [];
 
     if (typeof sort === 'string') {

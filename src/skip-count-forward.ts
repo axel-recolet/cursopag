@@ -21,19 +21,24 @@ export async function skipCountForward<T = unknown>({
   skipCursor,
 }: {
   model: Model<T>;
-  cursor: Record<string, unknown>;
+  cursor?: Record<string, unknown>;
   sort: [string, 1 | -1][];
   filter: FilterQuery<T>;
   skipCursor: boolean;
 }): Promise<number> {
   try {
+    if (!cursor) return 0;
+
     // Get the first field from the sorting criteria.
     const field = sort[0][0];
     // Retrieve the value of the field from the cursor.
-    const { value, exists } = getValueByPath(cursor, field);
+    const value = getValueByPath(cursor, field);
 
-    // Throw an error if the field doesn't exist in the cursor.
-    if (!exists) throw new Error(`${field} is not a key of cursor.`);
+    // Check if the main sorted field is unique
+    const mainSortedFieldIsUnique: boolean =
+      field === '_id' ? true : model.schema.path(field).options.unique;
+
+    if (mainSortedFieldIsUnique) return 0;
 
     // Create a query to find documents with the same value as the cursor's field.
     const equalQuery: Condition<T> = {
@@ -44,7 +49,7 @@ export async function skipCountForward<T = unknown>({
     // select fields for sorting, sort the documents, and make them lean.
     const equalDocs = await model
       .find(equalQuery)
-      .select(sort.map((value) => value[0]))
+      .select(sort.map(([sortedField]) => sortedField))
       .sort(sort)
       .lean();
 

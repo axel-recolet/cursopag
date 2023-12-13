@@ -1,18 +1,18 @@
 export function getValueByPath(
-  obj: Record<string, unknown>,
+  cursor: Record<string, unknown>,
   path: string,
-): { exists: boolean; value: unknown } {
+): unknown {
   try {
     const keys = path.split('.');
-    let currentObj: unknown = obj;
+    let currentObj: unknown = cursor;
     for (const key of keys) {
       if (currentObj && typeof currentObj === 'object' && key in currentObj) {
         currentObj = (currentObj as Record<string, unknown>)[key];
       } else {
-        return { value: undefined, exists: false };
+        throw new Error(`${key} is not a key of cursor.`);
       }
     }
-    return { value: currentObj, exists: true };
+    return currentObj;
   } catch (error) {
     throw error;
   }

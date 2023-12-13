@@ -1,6 +1,5 @@
-import { Schema, Types } from 'mongoose';
+import { Schema } from 'mongoose';
 import { createMainSortedFiledCondition } from './create-main-sorted-filed-condition';
-import { Binary, EJSON } from 'bson';
 
 describe('createMainSortedFiledCondition function', () => {
   // Mocking a basic schema for testing purposes
@@ -23,69 +22,67 @@ describe('createMainSortedFiledCondition function', () => {
       describe('Ascending Sort Order', () => {
         const sortOrder = 1;
 
-        describe('SkipEqual true', () => {
-          const skip = true;
+        describe('SkipCursor true', () => {
+          const skipCursor = true;
 
           it('Value true, direction = 1, sortOrder = 1, skip = true', () => {
-            const value = true;
+            const cursor = { [field]: true };
 
-            const condition = createMainSortedFiledCondition(
-              [field, sortOrder],
-              value,
+            const condition = createMainSortedFiledCondition({
+              mainSort: [field, sortOrder],
+              cursor,
               schema,
-              skip,
+              skipCursor,
               direction,
-            );
-
-            expect(condition).toEqual({
-              [field]: value,
             });
+
+            expect(condition).toEqual({ [field]: true });
           });
 
           it('Value false, direction = 1, sortOrder = 1, skip = true', () => {
-            const value = false;
+            const cursor = { [field]: false };
 
-            const condition = createMainSortedFiledCondition(
-              [field, sortOrder],
-              value,
+            const condition = createMainSortedFiledCondition({
+              mainSort: [field, sortOrder],
+              cursor,
               schema,
-              skip,
+              skipCursor,
               direction,
-            );
+            });
 
             expect(condition).toBeUndefined();
           });
         });
 
-        describe('SkipEqual false', () => {
-          const skip = false;
+        describe('SkipCursor false', () => {
+          const skipCursor = false;
 
           it('Value true, direction = 1, sortOrder = 1, skip = false', () => {
-            const value = true;
+            const cursor = { [field]: true };
 
-            const condition = createMainSortedFiledCondition(
-              [field, sortOrder],
-              value,
+            const condition = createMainSortedFiledCondition({
+              mainSort: [field, sortOrder],
+              cursor,
               schema,
-              skip,
+              skipCursor,
               direction,
-            );
+            });
 
             expect(condition).toEqual({
-              [field]: value,
+              [field]: true,
             });
           });
 
           it('Value false, direction = 1, sortOrder = 1, skip = false', () => {
-            const value = false;
+            const cursor = { [field]: false };
 
-            const condition = createMainSortedFiledCondition(
-              [field, sortOrder],
-              value,
+            const condition = createMainSortedFiledCondition({
+              mainSort: [field, sortOrder],
+              cursor,
               schema,
-              skip,
+              skipCursor,
               direction,
-            );
+            });
 
             expect(condition).toBeUndefined();
           });
@@ -95,33 +92,33 @@ describe('createMainSortedFiledCondition function', () => {
       describe('Descending Sort Order', () => {
         const sortOrder = -1;
 
-        describe('SkipEqual true', () => {
-          const skip = true;
+        describe('SkipCursor true', () => {
+          const skipCursor = true;
 
           it('Value true, direction = 1, sortOrder = -1, skip = true', () => {
-            const value = true;
+            const cursor = { [field]: true };
 
-            const condition = createMainSortedFiledCondition(
-              [field, sortOrder],
-              value,
+            const condition = createMainSortedFiledCondition({
+              mainSort: [field, sortOrder],
+              cursor,
               schema,
-              skip,
+              skipCursor,
               direction,
-            );
+            });
 
             expect(condition).toBeUndefined();
           });
 
           it('Value false, direction = 1, sortOrder = -1, skip = true', () => {
-            const value = false;
+            const cursor = { [field]: false };
 
-            const condition = createMainSortedFiledCondition(
-              [field, sortOrder],
-              value,
+            const condition = createMainSortedFiledCondition({
+              mainSort: [field, sortOrder],
+              cursor,
               schema,
-              skip,
+              skipCursor,
               direction,
-            );
+            });
 
             expect(condition).toEqual({
               [field]: false,
@@ -129,112 +126,112 @@ describe('createMainSortedFiledCondition function', () => {
           });
         });
 
-        describe('SkipEqual false', () => {
-          const skip = false;
+        describe('SkipCursor false', () => {
+          const skipCursor = false;
 
           it('Value true, direction = 1, sortOrder = -1, skip = false', () => {
-            const value = true;
+            const cursor = { [field]: true };
 
-            const condition = createMainSortedFiledCondition(
-              [field, sortOrder],
-              value,
+            const condition = createMainSortedFiledCondition({
+              mainSort: [field, sortOrder],
+              cursor,
               schema,
-              skip,
+              skipCursor,
               direction,
-            );
+            });
 
             expect(condition).toBeUndefined();
           });
 
           it('Value false', () => {
-            const value = false;
+            const cursor = { [field]: false };
 
-            const condition = createMainSortedFiledCondition(
-              [field, sortOrder],
-              value,
+            const condition = createMainSortedFiledCondition({
+              mainSort: [field, sortOrder],
+              cursor,
               schema,
-              skip,
+              skipCursor,
               direction,
-            );
+            });
 
             expect(condition).toEqual({
-              [field]: value,
+              [field]: false,
             });
           });
         });
       });
     });
 
-    describe('Ascending direction', () => {
+    describe('Descending direction', () => {
       const direction = -1;
 
       describe('Ascending Sort Order', () => {
         const sortOrder = 1;
 
-        describe('SkipEqual true', () => {
-          const skip = true;
+        describe('SkipCursor true', () => {
+          const skipCursor = true;
 
           it('Value true, direction = -1, sortOrder = 1, skip = true', () => {
-            const value = true;
+            const cursor = { [field]: true };
 
-            const condition = createMainSortedFiledCondition(
-              [field, sortOrder],
-              value,
+            const condition = createMainSortedFiledCondition({
+              mainSort: [field, sortOrder],
+              cursor,
               schema,
-              skip,
+              skipCursor,
               direction,
-            );
+            });
 
             expect(condition).toBeUndefined();
           });
 
           it('Value false, direction = -1, sortOrder = 1, skip = true', () => {
-            const value = false;
+            const cursor = { [field]: false };
 
-            const condition = createMainSortedFiledCondition(
-              [field, sortOrder],
-              value,
+            const condition = createMainSortedFiledCondition({
+              mainSort: [field, sortOrder],
+              cursor,
               schema,
-              skip,
+              skipCursor,
               direction,
-            );
+            });
 
             expect(condition).toEqual({
-              [field]: value,
+              [field]: false,
             });
           });
         });
 
-        describe('SkipEqual false', () => {
-          const skip = false;
+        describe('SkipCursor false', () => {
+          const skipCursor = false;
 
           it('Value true, direction = 1, sortOrder = 1, skip = false', () => {
-            const value = true;
+            const cursor = { [field]: true };
 
-            const condition = createMainSortedFiledCondition(
-              [field, sortOrder],
-              value,
+            const condition = createMainSortedFiledCondition({
+              mainSort: [field, sortOrder],
+              cursor,
               schema,
-              skip,
+              skipCursor,
               direction,
-            );
+            });
 
             expect(condition).toBeUndefined();
           });
 
           it('Value false, direction = 1, sortOrder = 1, skip = false', () => {
-            const value = false;
+            const cursor = { [field]: false };
 
-            const condition = createMainSortedFiledCondition(
-              [field, sortOrder],
-              value,
+            const condition = createMainSortedFiledCondition({
+              mainSort: [field, sortOrder],
+              cursor,
               schema,
-              skip,
+              skipCursor,
               direction,
-            );
+            });
 
             expect(condition).toEqual({
-              [field]: value,
+              [field]: false,
             });
           });
         });
@@ -243,69 +240,69 @@ describe('createMainSortedFiledCondition function', () => {
       describe('Descending Sort Order', () => {
         const sortOrder = -1;
 
-        describe('SkipEqual true', () => {
-          const skip = true;
+        describe('SkipCursor true', () => {
+          const skipCursor = true;
 
           it('Value true, direction = -1, sortOrder = -1, skip = true', () => {
-            const value = true;
+            const cursor = { [field]: true };
 
-            const condition = createMainSortedFiledCondition(
-              [field, sortOrder],
-              value,
+            const condition = createMainSortedFiledCondition({
+              mainSort: [field, sortOrder],
+              cursor,
               schema,
-              skip,
+              skipCursor,
               direction,
-            );
+            });
 
             expect(condition).toEqual({
-              [field]: value,
+              [field]: true,
             });
           });
 
           it('Value false, direction = -1, sortOrder = -1, skip = true', () => {
-            const value = false;
+            const cursor = { [field]: false };
 
-            const condition = createMainSortedFiledCondition(
-              [field, sortOrder],
-              value,
+            const condition = createMainSortedFiledCondition({
+              mainSort: [field, sortOrder],
+              cursor,
               schema,
-              skip,
+              skipCursor,
               direction,
-            );
+            });
 
             expect(condition).toBeUndefined();
           });
         });
 
-        describe('SkipEqual false', () => {
-          const skip = false;
+        describe('SkipCursor false', () => {
+          const skipCursor = false;
 
           it('Value true, direction = -1, sortOrder = -1, skip = false', () => {
-            const value = true;
+            const cursor = { [field]: true };
 
-            const condition = createMainSortedFiledCondition(
-              [field, sortOrder],
-              value,
+            const condition = createMainSortedFiledCondition({
+              mainSort: [field, sortOrder],
+              cursor,
               schema,
-              skip,
+              skipCursor,
               direction,
-            );
+            });
 
             expect(condition).toEqual({
-              [field]: value,
+              [field]: true,
             });
           });
 
           it('Value false, direction = -1, sortOrder = -1, skip = false', () => {
-            const value = false;
+            const cursor = { [field]: false };
 
-            const condition = createMainSortedFiledCondition(
-              [field, sortOrder],
-              value,
+            const condition = createMainSortedFiledCondition({
+              mainSort: [field, sortOrder],
+              cursor,
               schema,
-              skip,
+              skipCursor,
               direction,
-            );
+            });
 
             expect(condition).toBeUndefined();
           });
@@ -316,17 +313,15 @@ describe('createMainSortedFiledCondition function', () => {
 
   it('should create a condition for sorting when the field is not a boolean type and skip is false', () => {
     const field = 'age';
-    const direction = -1;
     const value = 30;
-    const skip = false;
 
-    const condition = createMainSortedFiledCondition(
-      [field, direction],
-      value,
+    const condition = createMainSortedFiledCondition({
+      mainSort: [field, -1],
+      cursor: { [field]: value },
       schema,
-      skip,
-      1,
-    );
+      skipCursor: false,
+      direction: 1,
+    });
 
     expect(condition).toEqual({
       [field]: { $lte: value }, // Expects the condition for non-boolean type with skip as false and direction -1
@@ -335,17 +330,15 @@ describe('createMainSortedFiledCondition function', () => {
 
   it('should create a condition for sorting when the field is array of string type and skip is false', () => {
     const field = 'age';
-    const direction = -1;
     const value = 30;
-    const skip = false;
 
-    const condition = createMainSortedFiledCondition(
-      [field, direction],
-      value,
+    const condition = createMainSortedFiledCondition({
+      mainSort: [field, -1],
+      cursor: { [field]: value },
       schema,
-      skip,
-      1,
-    );
+      skipCursor: false,
+      direction: 1,
+    });
 
     expect(condition).toEqual({
       [field]: { $lte: value }, // Expects the condition for non-boolean type with skip as false and direction -1
@@ -359,16 +352,14 @@ describe('createMainSortedFiledCondition function', () => {
 
     const field = 'field';
     const value = Buffer.from('example');
-    const direction: 1 | -1 = 1;
-    const skip = false;
 
-    const condition = createMainSortedFiledCondition(
-      [field, direction],
-      value,
+    const condition = createMainSortedFiledCondition({
+      mainSort: [field, 1],
+      cursor: { [field]: value },
       schema,
-      skip,
-      1,
-    );
+      skipCursor: false,
+      direction: 1,
+    });
 
     // Buffer type should construct a condition with $gte operator
     expect(condition).toEqual({ field: { $gte: value } });
@@ -376,19 +367,17 @@ describe('createMainSortedFiledCondition function', () => {
 
   it('should handle errors when schema retrieval fails', () => {
     const field = 'nonExistentField';
-    const direction = 1;
     const value = 'test';
-    const skip = false;
 
     // Expecting an error to be thrown when the field does not exist in the schema
-    expect(() => {
-      createMainSortedFiledCondition(
-        [field, direction],
-        value,
+    expect(() =>
+      createMainSortedFiledCondition({
+        mainSort: [field, 1],
+        cursor: { [field]: value },
         schema,
-        skip,
-        1,
-      );
-    }).toThrow();
+        skipCursor: false,
+        direction: 1,
+      }),
+    ).toThrow();
   });
 });

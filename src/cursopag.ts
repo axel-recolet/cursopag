@@ -1,25 +1,22 @@
 import {
   FilterQuery,
-  HydratedDocument,
   Model,
   ProjectionFields,
   QueryOptions,
-  Schema,
   SortOrder,
 } from 'mongoose';
 import { CursopagResponse, Edge } from './paginated-response.interface';
-import { validateObjectAgainstSchema } from './validate-object-against-schema';
 import {
   cursorPreDecoder,
   cursorEncoder as defaultCursorEncoder,
 } from './encode-cursor';
 import { normalizeSort } from './normalize-sort';
-import { getValueByPath } from './get-value-by-path';
 import { createMainSortedFiledCondition } from './create-main-sorted-filed-condition';
 import { getLimitAndDirection } from './get-limit-and-direction';
 import { skipCountForward } from './skip-count-forward';
-import { EJSON } from 'bson';
 import { skipCountBackward } from './skip-count-backward';
+import { createEdgesFromQuery } from './create-edges-from-query';
+import { getBackwardScopeQuery } from './get-backward-scope-query';
 
 /**
  * Represents an asynchronous function that retrieves documents in an ascending direction.
@@ -46,7 +43,7 @@ export async function forward<T>({
   projection,
   queryOptions,
   skipCursor,
-  cursorEncoder = defaultCursorEncoder,
+  cursorEncoder,
 }: {
   model: Model<T>;
   cursor?: Record<string, unknown>;
@@ -59,59 +56,26 @@ export async function forward<T>({
   cursorEncoder?: (cursor: string) => string | Promise<string>;
 }): Promise<Edge<T>[]> {
   try {
-    // Extract the main sorted field
-    const mainSortedField = sort[0][0];
-
-    // Get the value of the main sorted field from the cursor
-    const { value: mainSortedValue, exists } = getValueByPath(
-      cursor ?? {},
-      mainSortedField,
-    );
-
-    // Check if the main sorted field exists in the cursor
-    if (cursor && !exists)
-      throw new Error(`${mainSortedField} is not a key of cursor.`);
-
-    // Check if the main sorted field is unique
-    const mainSortedFieldIsUnique: boolean =
-      mainSortedField === '_id'
-        ? true
-        : model.schema.path(mainSortedField).options.unique;
-
-    const schemaType = model.schema.path(sort[0][0]);
-
-    const fullCheck: boolean =
-      schemaType instanceof Schema.Types.Subdocument ||
-      schemaType instanceof Schema.Types.Map ||
-      schemaType instanceof Schema.Types.Mixed ||
-      schemaType instanceof Schema.Types.Array;
-
     // Calculate the skip count based on conditions
-    const skip =
-      !cursor || mainSortedFieldIsUnique
-        ? 0
-        : await skipCountForward({
-            model,
-            cursor,
-            sort,
-            filter,
-            skipCursor,
-          });
+    const skip = await skipCountForward({
+      model,
+      cursor,
+      sort,
+      filter,
+      skipCursor,
+    });
 
     // Create conditions for the main sorted field
-    const mainSortedFiledCondition =
-      !cursor || fullCheck
-        ? undefined
-        : createMainSortedFiledCondition(
-            sort[0],
-            mainSortedValue,
-            model.schema,
-            skipCursor,
-            1,
-          );
+    const mainSortedFiledCondition = createMainSortedFiledCondition({
+      direction: 1,
+      cursor,
+      mainSort: sort[0],
+      schema: model.schema,
+      skipCursor,
+    });
 
     // Construct the query for retrieving documents
-    const queryCursor = model
+    const query = model
       .find(
         mainSortedFiledCondition
           ? {
@@ -125,34 +89,13 @@ export async function forward<T>({
       .limit(limit)
       .lean();
 
-    // Array to store results
-    const result: {
-      node: HydratedDocument<T>;
-      cursor: string;
-    }[] = [];
-
-    // Iterate through the query results
-    for await (const doc of queryCursor) {
-      const nodeQuery = model.findById(doc._id, undefined, queryOptions);
-
-      // Apply projection if specified
-      if (projection) {
-        nodeQuery.projection(projection);
-      }
-
-      const node = await nodeQuery;
-
-      // Continue if node is not found
-      if (!node) continue;
-
-      // Push node and cursor to result array
-      result.push({
-        node,
-        cursor: await cursorEncoder(EJSON.stringify(doc, { relaxed: false })),
-      });
-    }
-
-    return result;
+    return createEdgesFromQuery({
+      model,
+      query,
+      projection,
+      queryOptions,
+      cursorEncoder,
+    });
   } catch (error) {
     throw error;
   }
@@ -178,7 +121,7 @@ export async function backward<T>({
   model,
   cursor,
   filter,
-  limit,
+  limit: originalLimit,
   sort,
   projection,
   queryOptions,
@@ -198,104 +141,50 @@ export async function backward<T>({
   cursorEncoder?: (cursor: string) => string | Promise<string>;
 }): Promise<Edge<T>[]> {
   try {
-    // Extract the main sorted field
-    const mainSortedField = sort[0][0];
-
-    // Get the value of the main sorted field from the cursor
-    const { value: mainSortedValue, exists } = getValueByPath(
-      cursor ?? {},
-      mainSortedField,
-    );
-
-    // Check if the main sorted field exists in the cursor
-    if (cursor && !exists)
-      throw new Error(`${mainSortedField} is not a key of cursor.`);
-
-    // Check if the main sorted field is unique
-    const mainSortedFieldIsUnique: boolean =
-      mainSortedField === '_id'
-        ? true
-        : model.schema.path(mainSortedField).options.unique;
-
-    const schemaType = model.schema.path(sort[0][0]);
-
     // Calculate the skip count based on conditions
-    let skip = await (async () => {
-      if (mainSortedFieldIsUnique) return 0;
-      if (!cursor) return reqLength - limit;
+    const { skip, limit } = await getBackwardScopeQuery({
+      model,
+      filter,
+      sort,
+      reqLength,
+      limit: originalLimit,
+      skipCursor,
+      cursor,
+    });
 
-      const skip = await skipCountBackward({
-        model,
-        cursor,
-        sort,
-        filter,
-        skipCursor,
-      });
-
-      return skip - limit;
-    })();
-
-    if (skip < 0) {
-      limit += skip;
-      skip = 0;
-    }
+    if (limit <= 0) return [];
 
     // Create conditions for the main sorted field
-    const mainSortedFiledCondition = !cursor
-      ? undefined
-      : createMainSortedFiledCondition(
-          sort[0],
-          mainSortedValue,
-          model.schema,
-          skipCursor,
-          -1,
-        );
+    const mainSortedFiledCondition = createMainSortedFiledCondition({
+      direction: -1,
+      cursor,
+      mainSort: sort[0],
+      schema: model.schema,
+      skipCursor,
+    });
 
     // Construct the query for retrieving documents
-    const queryCursor =
-      limit === 0
-        ? []
-        : model
-            .find(
-              mainSortedFiledCondition
-                ? {
-                    $and: [filter, mainSortedFiledCondition],
-                  }
-                : filter,
-            )
-            .sort(sort)
-            .select(sort.map((value) => value[0]))
-            .skip(skip)
-            .limit(limit)
-            .lean();
+    const query = model
+      .find(
+        mainSortedFiledCondition
+          ? {
+              $and: [filter, mainSortedFiledCondition],
+            }
+          : filter,
+      )
+      .sort(sort)
+      .select(sort.map((value) => value[0]))
+      .skip(skip)
+      .limit(limit)
+      .lean();
 
-    // Array to store results
-    const result: {
-      node: HydratedDocument<T>;
-      cursor: string;
-    }[] = [];
-
-    // Iterate through the query results
-    for await (const doc of queryCursor) {
-      const nodeQuery = model.findById(doc._id, undefined, queryOptions);
-
-      // Apply projection if specified
-      if (projection) {
-        nodeQuery.projection(projection);
-      }
-
-      const node = await nodeQuery;
-
-      // Continue if node is not found
-      if (!node) continue;
-
-      // Push node and cursor to result array
-      result.push({
-        node,
-        cursor: await cursorEncoder(EJSON.stringify(doc, { relaxed: false })),
-      });
-    }
-    return result;
+    return createEdgesFromQuery({
+      model,
+      query,
+      projection,
+      queryOptions,
+      cursorEncoder,
+    });
   } catch (error) {
     throw error;
   }
@@ -334,24 +223,7 @@ export async function getEdges<T>(params: {
     const { cursor, model, sort, first, last, ...restParams } = params;
 
     // Normalize sort criteria or default to sorting by _id in ascending order
-    const normalizedSort: [string, 1 | -1][] = sort
-      ? normalizeSort(sort)
-      : [['_id', 1]];
-
-    if (cursor) {
-      // Validate the cursor against the model's schema
-      if (!validateObjectAgainstSchema(cursor, model.schema)) {
-        throw new Error(
-          "Cursor content doesn't corresponding to the schema's model",
-        );
-      }
-
-      // Check if the main sorted field exists in the cursor
-      const { exists, value } = getValueByPath(cursor, normalizedSort[0][0]);
-      if (!exists) {
-        throw Error('The main sorted field is not present in the cursor.');
-      }
-    }
+    const normalizedSort: [string, 1 | -1][] = normalizeSort(sort);
 
     // Determine pagination direction and limit based on first and last parameters
     const { direction, limit } = getLimitAndDirection({ first, last });
@@ -413,16 +285,8 @@ export async function cursopag<T>(params: {
   cursorEncoder?: (cursor: string) => Promise<string> | string;
 }): Promise<CursopagResponse<T>> {
   try {
-    const {
-      model,
-      filter,
-      after,
-      before,
-      first,
-      last,
-      sort = [['_id', 1]],
-      cursorDecoder,
-    } = params;
+    const { model, filter, after, before, first, last, sort, cursorDecoder } =
+      params;
 
     if (!first && !last) {
       throw Error('Both first and last are set. Unable to find direction.');
@@ -466,8 +330,9 @@ export async function cursopag<T>(params: {
     });
 
     // Check for presence of previous edges using cursor
-    const previous = decodedCursor
-      ? (
+    const previous = !decodedCursor
+      ? undefined
+      : (
           await getEdges<T>({
             ...params,
             cursor: decodedCursor,
@@ -478,8 +343,7 @@ export async function cursopag<T>(params: {
             skipCursor: false,
             reqLength: result.totalCount,
           })
-        ).length !== 0
-      : undefined;
+        ).length !== 0;
 
     // Determine hasNextPage and hasPreviousPage based on pagination direction
     if (first) {
