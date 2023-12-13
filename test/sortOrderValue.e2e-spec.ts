@@ -2,7 +2,7 @@ import { faker } from '@faker-js/faker';
 import { Binary, Long } from 'bson';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import mongoose, { Model, Schema, Types, mongo } from 'mongoose';
-import { RankedValue, compare } from 'src/compare-value';
+import { RankedValue, compare } from 'src/ranked-value';
 
 describe('sortOrderValue', () => {
   let mongod: MongoMemoryServer;

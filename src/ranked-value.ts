@@ -1,5 +1,5 @@
 import { Binary, UUID } from 'bson';
-import mongoose, { Types } from 'mongoose';
+import { Types } from 'mongoose';
 import { isRegExp } from 'util/types';
 
 /**
@@ -132,7 +132,7 @@ export class RankedValue<T = unknown> {
   compare(b: RankedValue, direction: 1 | -1): 0 | 1 | -1 {
     // Perform comparison based on rank and value.
     if (this.rank === 5 || b.rank === 5) {
-      // For rank 3 (Array)
+      // For rank 5 (Array)
       const arrayA = this.rank === 5 ? (this._value as RankedValue[]) : [this];
       const arrayB = b.rank === 5 ? (b._value as RankedValue[]) : [b];
 
@@ -179,6 +179,9 @@ export class RankedValue<T = unknown> {
         );
 
         while (i < iterableARecord.length || i < iterableBRecord.length) {
+          if (iterableARecord.length <= i) return -1;
+          else if (iterableBRecord.length <= i) return 1;
+
           const [keyA, vA] = iterableARecord[i];
           const [keyB, vB] = iterableBRecord[i];
 

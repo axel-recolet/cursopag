@@ -1,4 +1,4 @@
-import { compare } from './compare-value';
+import { compare } from './ranked-value';
 
 /**
  * Sorts two objects based on specified sorting criteria.
