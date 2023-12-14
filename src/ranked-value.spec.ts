@@ -1,6 +1,7 @@
 import { Binary, Decimal128 } from 'bson';
 import { RankedValue, compare } from './ranked-value';
 import { Types } from 'mongoose';
+import * as uuid from 'uuid';
 
 describe('RankedValue class', () => {
   describe('setProperties method', () => {
@@ -245,6 +246,14 @@ describe('RankedValue class', () => {
       {
         a: new Binary(Buffer.from('a'), Binary.SUBTYPE_BYTE_ARRAY),
         aDesc: "Binary('a')",
+        b: new Types.UUID('a9755c88-3a9e-4510-bd54-41e3de73dd1a'),
+        bDesc: 'uuid',
+        direction: 1,
+        expected: -1,
+      },
+      {
+        a: new Types.UUID('a9755c88-3a9e-4510-bd54-41e3de73dd1a'),
+        aDesc: 'uuid',
         b: new Types.ObjectId('657a13ff46f68004fe886ea6'),
         bDesc: "ObjectId('657a13ff46f68004fe886ea6')",
         direction: 1,
@@ -283,8 +292,18 @@ describe('RankedValue class', () => {
         expected: -1,
       },
       {
-        a: [],
-        b: new Binary(Buffer.from('a'), Binary.SUBTYPE_BYTE_ARRAY),
+        a: new Date('2023-12-13T21:25+01:00'),
+        aDesc: "Date('2023-12-13T21:25+01:00')",
+        b: new Date('2023-12-13T21:26+01:00'),
+        bDesc: "Date('2023-12-13T21:26+01:00')",
+        direction: 1,
+        expected: -1,
+      },
+      {
+        a: new Date('2023-12-13T21:26+01:00'),
+        aDesc: "Date('2023-12-13T21:26+01:00')",
+        b: /abcd/g,
+        bDesc: '/abcd/g',
         direction: 1,
         expected: -1,
       },

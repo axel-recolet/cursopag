@@ -1,12 +1,13 @@
 {
-  "name": "cursopag",
+  "name": "@cursopag/mongoose",
   "version": "0.1.0",
   "description": "GraphQL cursor-based for Mongoose",
-  "main": "lib/cursopag.js",
-  "module": "lib/cursopag.js",
-  "types": "lib/cursopag.d.ts",
+  "main": "dist/cursopag.js",
+  "module": "dist/cursopag.js",
+  "types": "dist/cursopag.d.ts",
   "scripts": {
     "build": "tsc --project tsconfig.build.json",
+    "prepare": "npm run build",
     "test:watch": "jest --watchAll",
     "test:cov": "jest --coverage"
   },
@@ -17,7 +18,10 @@
     "cursopagjs",
     "cursopag.js",
     "GraphQL",
-    "mongoose"
+    "mongoose",
+    "pagination",
+    "cursor-based",
+    "relay"
   ],
   "repository": {
     "type": "git",

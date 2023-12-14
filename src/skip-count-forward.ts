@@ -10,7 +10,7 @@ import { findIndex } from './find-index';
  * @param {Record<string, unknown>} options.cursor - The cursor object used for comparison.
  * @param {[string, 1 | -1][]} options.sort - The sorting criteria.
  * @param {FilterQuery<T>} options.filter - The filter query for database lookup.
- * @param {boolean} options.skipCursor - If the cursor is in the selection, +1
+ * @param {boolean} options.skipCursor - The cursor is in the selection,
  * @returns {Promise<number>} - Returns the count to skip.
  */
 export async function skipCountForward<T = unknown>({

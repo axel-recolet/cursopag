@@ -93,11 +93,7 @@ export class RankedValue<T = unknown> {
         value instanceof UUID
       ) {
         // Set rank as 6 for Buffers or instances of Binary.
-        const rank = 6;
-        if (value instanceof UUID) {
-          return { rank, _value: value };
-        }
-        return { rank, _value: value };
+        return { rank: 6, _value: value };
       } else if (value instanceof Types.ObjectId) {
         // Set rank as 7 for instances of Types.ObjectId.
         return { _value: value.toHexString(), rank: 7 };
