@@ -1,5 +1,5 @@
 {
-  "name": "@cursopag/mongoose",
+  "name": "cursopag",
   "version": "0.1.0",
   "description": "GraphQL cursor-based for Mongoose",
   "main": "dist/cursopag.js",
