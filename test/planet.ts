@@ -125,6 +125,7 @@ export type PlanetDocument = HydratedDocument<IPlanet>;
 
 @Schema({
   id: true,
+  minimize: false,
   toObject: {
     virtuals: true,
     versionKey: false,

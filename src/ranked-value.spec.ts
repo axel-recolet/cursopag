@@ -220,6 +220,14 @@ describe('RankedValue class', () => {
         expected: -1,
       },
       {
+        a: [true],
+        aDesc: '[ObjectId, true]',
+        b: true,
+        bDesc: '[]',
+        direction: 1,
+        expected: -1,
+      },
+      {
         a: { key: 'a' },
         aDesc: "{ key: 'a' }",
         b: { moo: 'a' },

@@ -16,12 +16,15 @@ npm install cursopag
 
 ```typescript
 import { cursopag } from 'cursopag';
+import { EJSON } from 'bson';
 import mongoose, { HydratedDocument, Types, Document } from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
 type PlanetDocument = HydratedDocument<Planet>;
 
-@Schema()
+@Schema({
+  minimize: false,
+})
 class Planet {
   _id: Types.ObjectId;
 
@@ -168,9 +171,13 @@ Cursors in cursopag are crucial identifiers that mark specific positions in pagi
 
 2. **EJSON Stringification**: The cursor is then converted into a string format using EJSON (Extended JSON) stringification. This step captures the cursor's state in a readable JSON-like format, preserving the essential information required to resume pagination from a specific point.
 
-3. **Base64 Encoding**: Following the EJSON stringification, the cursor is encoded into a Base64 format. This encoding process serves as a secure and compact representation of the cursor, suitable for transmission and storage while maintaining its integrity.
+3. **Base64 Encoding**: Following the [EJSON stringification](https://www.npmjs.com/package/bson#ejsonstringifyvalue-replacer-space-options) , the cursor is encoded into a Base64 format. This encoding process serves as a secure and compact representation of the cursor, suitable for transmission and storage while maintaining its integrity.
 
-While this encoding process provides a default mechanism for cursor creation, cursopag offers the flexibility to substitute these steps with custom **_cursorEncoder_** and **_cursorDecoder_** functions. This customization enables users to replace the default encoding and decoding process with their implementation, facilitating scenarios where sorting might involve fields not visible to end-users. For instance, by encoding the cursor with a private key, users can securely manage and encode the cursor's sensitive information, enhancing data privacy and control.
+While this encoding process provides a default mechanism for cursor creation, cursopag offers the flexibility to substitute these steps with custom **`_cursorEncoder_`** and **_`cursorDecoder`_** functions. This customization enables users to replace the default encoding and decoding process with their implementation, facilitating scenarios where sorting might involve fields not visible to end-users. For instance, by encoding the cursor with a private key, users can securely manage and encode the cursor's sensitive information, enhancing data privacy and control.
+
+### Minimize Mongoose options
+
+It's highly advisable to disable the [`minimize` option within the Mongoose schema](https://mongoosejs.com/docs/guide.html#minimize) used with Cursopag. Enabling this option can alter the sorting order of documents, potentially causing inconsistencies in the sorting logic utilized by the package. By keeping the `minimize` option disabled, the sorting results remain consistent with the user-defined logic, ensuring accurate and reliable pagination.
 
 ## License
 
