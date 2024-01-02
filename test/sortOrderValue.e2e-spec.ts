@@ -6,9 +6,12 @@ import { RankedValue, compare } from 'src/ranked-value';
 
 describe('sortOrderValue', () => {
   let mongod: MongoMemoryServer;
-  const thingSchema = new Schema({
-    key: Schema.Types.Mixed,
-  });
+  const thingSchema = new Schema(
+    {
+      key: Schema.Types.Mixed,
+    },
+    { minimize: false },
+  );
   const thingModel = mongoose.model('Thing', thingSchema);
 
   beforeEach(async () => {
@@ -27,6 +30,10 @@ describe('sortOrderValue', () => {
     beforeEach(async () => {
       const rawDoc = [
         {
+          _id: new Types.ObjectId('65802cd94e817a673d23b3ed'),
+          key: {},
+        },
+        {
           _id: new Types.ObjectId('656c445f8625c3a5139d8ab8'),
           key: new Types.ObjectId('656af5887c8c1857eb0243e4'),
         },
@@ -38,6 +45,7 @@ describe('sortOrderValue', () => {
         { _id: new Types.ObjectId('656c44e73310d5a81211f3b3'), key: [] },
         { _id: new Types.ObjectId('656c4525894e5af013a981a9'), key: [2, 'a'] },
         { _id: new Types.ObjectId('656c450bb412bee400a21330'), key: [0, 'c'] },
+        { _id: new Types.ObjectId('6580230fe066a3981649462a'), key: [true] },
         {
           _id: new Types.ObjectId('6571998af01409fddb01eb5a'),
           key: [
@@ -53,6 +61,7 @@ describe('sortOrderValue', () => {
           key: [true, new Date('2023-12-07')],
         },
         { _id: new Types.ObjectId('656c454a20458cad4929ae04'), key: undefined },
+        { _id: new Types.ObjectId('65802d8bf04bfd42ff540f92'), key: undefined },
         {
           _id: new Types.ObjectId('656c4551f92c05bb37456e70'),
           key: new Date('2023-12-02T06:53:00.478+02:00'),

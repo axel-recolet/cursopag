@@ -277,6 +277,7 @@ export async function cursopag<T>(params: {
   after?: string;
   before?: string;
   first?: number;
+  caslFilter?: FilterQuery<T>;
   last?: number;
   sort?: string | { [key: string]: SortOrder } | [string, SortOrder][];
   projection?: ProjectionFields<T> | string | null;
@@ -285,12 +286,20 @@ export async function cursopag<T>(params: {
   cursorEncoder?: (cursor: string) => Promise<string> | string;
 }): Promise<CursopagResponse<T>> {
   try {
-    const { model, filter, after, before, first, last, sort, cursorDecoder } =
-      params;
+    const { model, after, before, first, last, sort, cursorDecoder } = params;
 
     if (!first && !last) {
       throw Error('Both first and last are set. Unable to find direction.');
     }
+
+    const filter: FilterQuery<T> = (() => {
+      const { filter, caslFilter } = params;
+      if (caslFilter) {
+        return { $and: [filter, caslFilter] };
+      } else {
+        return filter;
+      }
+    })();
 
     // Initialize the paginated response
     const result: CursopagResponse<T> = {

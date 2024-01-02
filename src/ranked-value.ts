@@ -133,7 +133,10 @@ export class RankedValue<T = unknown> {
       const arrayB = b.rank === 5 ? (b._value as RankedValue[]) : [b];
 
       for (let i = 0; i < arrayA.length || i < arrayB.length; i++) {
+        if (i + 1 > arrayA.length) return -direction as 1 | -1;
         const valueA = arrayA[i];
+
+        if (i + 1 > arrayB.length) return direction;
         const valueB = arrayB[i];
 
         const result = valueA.compare(valueB, direction);
