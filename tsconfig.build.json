@@ -1,10 +1,12 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "target": "ES2019",
+    "target": "ESNext",
+    "module": "commonjs",
     "rootDir": "src",
 
     // extended tsconfig.json
+    "strict": true,
     "skipLibCheck": false,
     "allowSyntheticDefaultImports": false,
     "resolveJsonModule": false,
