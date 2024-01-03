@@ -1,6 +1,6 @@
 {
   "name": "cursopag",
-  "version": "0.1.2-1",
+  "version": "0.1.2-2",
   "description": "GraphQL cursor-based for Mongoose",
   "main": "dist/cursopag.js",
   "module": "dist/cursopag.js",
@@ -59,7 +59,7 @@
     "uuid": "^9.0.1"
   },
   "dependencies": {
-    "bson": "^6.2.0",
+    "bson": "6.2.0",
     "mongoose": "^8.0.1"
   }
 }
