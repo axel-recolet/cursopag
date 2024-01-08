@@ -1,7 +1,5 @@
-import mongoose, { Document, HydratedDocument } from 'mongoose';
-
 export interface Edge<T> {
-  node: HydratedDocument<T>;
+  node: T;
   cursor: string;
 }
 
